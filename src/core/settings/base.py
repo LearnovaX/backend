@@ -53,6 +53,7 @@ LOCAL_APPS = [
     "src.apps.notifications",
     "src.apps.grades",
     "src.apps.logs",
+    "src.apps.plagiarism",
 ]
 
 THIRD_PARTY_APPS = [
