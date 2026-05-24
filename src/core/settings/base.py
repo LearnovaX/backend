@@ -54,6 +54,8 @@ LOCAL_APPS = [
     "src.apps.grades",
     "src.apps.logs",
     "src.apps.plagiarism",
+    
+    "src.apps.chat",
 ]
 
 THIRD_PARTY_APPS = [
