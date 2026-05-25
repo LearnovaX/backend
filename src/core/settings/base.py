@@ -516,3 +516,13 @@ OTEL_EXPORTER_OTLP_ENDPOINT = env.str(
 OTEL_EXPORTER_OTLP_PROTOCOL = env.str(
     "OTEL_EXPORTER_OTLP_PROTOCOL", default="http/protobuf"
 )
+
+# RATE LIMITING
+# ============================================================================
+RATE_LIMITS = {
+    "default_authenticated": {"capacity": 300, "refill_rate": 10},
+    "default_anonymous": {"capacity": 60, "refill_rate": 1},
+}
+
+
+
