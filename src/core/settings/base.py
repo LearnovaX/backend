@@ -495,7 +495,24 @@ LOGGING = {
 
 ENROL_LINK_URL = env.str("ENROL_LINK_URL", default="http://localhost:5173/enroll/")
 
+import platform
+
+if platform.system() == "Windows":
+    TESSERACT_CMD = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+else:
+    TESSERACT_CMD = "tesseract"
 
 ENVIRONMENT = env.str("DJANGO_ENV", default="development")
 FRONTEND_URL = env.str("FRONTEND_URL", default="http://localhost:5173/")
 
+# OBSERVABILITY
+# ============================================================================
+PROMETHEUS_ENABLED = env.bool("PROMETHEUS_ENABLED", default=True)
+OTEL_ENABLED = env.bool("OTEL_ENABLED", default=False)
+OTEL_SERVICE_NAME = env.str("OTEL_SERVICE_NAME", default="backend")
+OTEL_EXPORTER_OTLP_ENDPOINT = env.str(
+    "OTEL_EXPORTER_OTLP_ENDPOINT", default="http://localhost:4318"
+)
+OTEL_EXPORTER_OTLP_PROTOCOL = env.str(
+    "OTEL_EXPORTER_OTLP_PROTOCOL", default="http/protobuf"
+)
