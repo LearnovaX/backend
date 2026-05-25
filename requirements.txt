@@ -1,0 +1,55 @@
+# --- Core Framework & API ---
+Django
+djangorestframework
+djangorestframework-simplejwt
+django-filter
+django-cors-headers
+whitenoise
+
+# --- Async, Task Queue & Cache ---
+celery
+django-celery-beat
+channels
+channels_redis
+daphne
+redis
+django-redis
+
+# --- Database & Storage ---
+psycopg2-binary
+django-storages
+boto3
+minio
+
+# --- UI, Admin & Extensions ---
+django-unfold
+django-ckeditor
+django-cleanup
+django-extensions
+django-silk
+django-query-counter
+
+# --- Data Science & Processing ---
+pandas
+numpy
+openpyxl
+pillow
+python-docx
+pypdf
+pytesseract
+
+# --- Utilities & Security ---
+argon2-cffi
+cryptography
+PyYAML
+requests
+python-decouple
+python-crontab
+cron-descriptor
+django-timezone-field
+Faker
+
+# --- Dev Tools & Types (Optional) ---
+pre-commit
+django-stubs
+drf-spectacular
