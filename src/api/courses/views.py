@@ -48,7 +48,14 @@ from src.apps.common.permissions import (
     IsEnrolledToCourse,
 )
 from src.apps.common.utils.files.export_courses import export_courses_to_csv, export_courses_to_xlsx
-
+from src.apps.courses.cache import (
+    COURSE_GROUPS_LIST_TTL,
+    COURSE_GROUPS_PAGE_TTL,
+    COURSES_LIGHT_LIST_TTL,
+    course_groups_list_cache_key,
+    course_groups_page_cache_key,
+    course_light_list_cache_key,
+)
 from src.apps.courses.filters import CourseFilter
 from src.apps.courses.models import Category, Course, CourseEnrollment, CourseGroup
 from src.apps.submissions.models import Answer
@@ -137,12 +144,16 @@ class CourseViewSet(viewsets.ModelViewSet):
     @action(methods=["get"], detail=True)
     def groups(self, request, pk=None):
         course: Course = self.get_object()
-        
+        cache_key = course_groups_page_cache_key(course.id)
+        cached_data = cache.get(cache_key)
+        if cached_data is not None:
+            return Response(cached_data, status=status.HTTP_200_OK)
 
         groups = course.groups.select_related("course__category", "course__author")
         # TODO -> optimize
         serializer = CourseGroupReadSerializer(groups, many=True)
         data = serializer.data
+        cache.set(cache_key, data, COURSE_GROUPS_PAGE_TTL)
         return Response(data, status=status.HTTP_200_OK)
 
     @action(methods=["get"], detail=True, url_path="teachers")
@@ -438,8 +449,13 @@ class CourseGroupViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         params = request.query_params.copy()
         params["__is_admin"] = "1" if request.user.groups.filter(name="Admins").exists() else "0"
-        response = super().list(request, *args, **kwargs)
+        cache_key = course_groups_list_cache_key(params)
+        cached_data = cache.get(cache_key)
+        if cached_data is not None:
+            return Response(cached_data, status=status.HTTP_200_OK)
 
+        response = super().list(request, *args, **kwargs)
+        cache.set(cache_key, response.data, COURSE_GROUPS_LIST_TTL)
         return response
 
     def perform_create(self, serializer):
