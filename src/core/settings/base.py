@@ -464,8 +464,19 @@ if FILE_LOGGING_ENABLED:
     else:
         FILE_LOGGING_ENABLED = os.access(LOGS_DIR, os.W_OK)
 
+
+
 # LOGGING
 # ============================================================================
+# In-memory logging configuration for high-scale applications
+IN_MEMORY_LOG_BUFFER_SIZE = env.int("IN_MEMORY_LOG_BUFFER_SIZE", default=10000)
+IN_MEMORY_LOG_OVERFLOW = env.str(
+    "IN_MEMORY_LOG_OVERFLOW", default="drop_oldest"
+)  # drop_oldest, drop_newest, error
+IN_MEMORY_LOG_QUEUE_SIZE = env.int("IN_MEMORY_LOG_QUEUE_SIZE", default=5000)
+IN_MEMORY_LOG_FLUSH_INTERVAL = env.float("IN_MEMORY_LOG_FLUSH_INTERVAL", default=5.0)
+IN_MEMORY_LOG_BATCH_SIZE = env.int("IN_MEMORY_LOG_BATCH_SIZE", default=100)
+
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -473,6 +484,11 @@ LOGGING = {
         "verbose": {
             "format": "[{asctime}] {levelname} {name}:{lineno} - {message}",
             "style": "{",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
+        },
+        "json": {
+            "()": "pythonjsonlogger.jsonlogger.JsonFormatter",
+            "format": "%(asctime)s %(name)s %(levelname)s %(message)s",
         },
     },
     "handlers": {
@@ -481,17 +497,37 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "verbose",
         },
-        # "db": {
-        #     "level": "INFO",
-        #     "class": "src.apps.logs.handlers.DatabaseHandler",
-        #     "formatter": "verbose",
-        # },
+        "in_memory": {
+            "level": "INFO",
+            "class": "src.apps.logs.in_memory_logger.InMemoryLogHandler",
+            "buffer_size": IN_MEMORY_LOG_BUFFER_SIZE,
+            "overflow_strategy": IN_MEMORY_LOG_OVERFLOW,
+        },
+        "optimized_db": {
+            "level": "INFO",
+            "class": "src.apps.logs.handlers.OptimizedDatabaseHandler",
+            "batch_size": IN_MEMORY_LOG_BATCH_SIZE,
+            "formatter": "verbose",
+        },
     },
     "root": {
-        "handlers": ["console", "db"],
+        "handlers": ["console", "in_memory"],
         "level": "INFO",
     },
+    "loggers": {
+        "django": {
+            "handlers": ["console", "in_memory"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "django.db.backends": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
+    },
 }
+
 
 ENROL_LINK_URL = env.str("ENROL_LINK_URL", default="http://localhost:5173/enroll/")
 
