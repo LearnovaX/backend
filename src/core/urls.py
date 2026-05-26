@@ -36,8 +36,8 @@ urlpatterns = [
     path("health/", health, name="health"),
     path("metrics/", metrics_view, name="metrics"),
     path("", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
-    path("schema/", SpectacularAPIView.as_view(), name="schema"),
-    path("silk/", include("silk.urls", namespace="silk")),
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path("api/silk/", include("silk.urls", namespace="silk")),
     path("api/admin/", admin.site.urls),
-    path("ckeditor/", include("ckeditor_uploader.urls")),
+    path("api/ckeditor/", include("ckeditor_uploader.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
