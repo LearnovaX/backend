@@ -49,11 +49,13 @@ from src.apps.common.permissions import (
 )
 from src.apps.common.utils.files.export_courses import export_courses_to_csv, export_courses_to_xlsx
 from src.apps.courses.cache import (
+    COURSES_LIST_TTL,
     COURSE_GROUPS_LIST_TTL,
     COURSE_GROUPS_PAGE_TTL,
-    COURSES_LIGHT_LIST_TTL,
+    courses_list_cache_key,
     course_groups_list_cache_key,
     course_groups_page_cache_key,
+    COURSES_LIGHT_LIST_TTL,
     course_light_list_cache_key,
 )
 from src.apps.courses.filters import CourseFilter
@@ -125,6 +127,16 @@ class CourseViewSet(viewsets.ModelViewSet):
                 to_attr="current_user_enrollments",
             )
         )
+
+    def list(self, request, *args, **kwargs):
+        cache_key = courses_list_cache_key(request.query_params)
+        cached_data = cache.get(cache_key)
+        if cached_data is not None:
+            return Response(cached_data, status=status.HTTP_200_OK)
+        
+        response = super().list(request, *args, **kwargs)
+        cache.set(cache_key, response.data, COURSES_LIST_TTL)
+        return response
 
     @action(methods=["get"], detail=False, url_path="my-courses")
     def my_courses(self, request):

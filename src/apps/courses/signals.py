@@ -5,6 +5,7 @@ from src.apps.courses.cache import (
     invalidate_course_groups_list_cache,
     invalidate_course_groups_page_cache,
     invalidate_courses_light_list_cache,
+    invalidate_courses_list_cache,
 )
 from src.apps.courses.models import Course, CourseEnrollment, CourseGroup
 from src.apps.users.models import User
@@ -72,6 +73,7 @@ def invalidate_group_pages_on_enrollment_delete(sender, instance, **kwargs) -> N
 
 @receiver(post_save, sender=Course)
 def invalidate_course_pages_on_save(sender, instance, **kwargs) -> None:
+    invalidate_courses_list_cache()
     invalidate_courses_light_list_cache()
     invalidate_course_groups_list_cache()
     invalidate_course_groups_page_cache([instance.id])
@@ -79,6 +81,7 @@ def invalidate_course_pages_on_save(sender, instance, **kwargs) -> None:
 
 @receiver(post_delete, sender=Course)
 def invalidate_course_pages_on_delete(sender, instance, **kwargs) -> None:
+    invalidate_courses_list_cache()
     invalidate_courses_light_list_cache()
     invalidate_course_groups_list_cache()
     invalidate_course_groups_page_cache([instance.id])
