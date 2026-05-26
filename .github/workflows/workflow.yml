@@ -1,0 +1,39 @@
+name: Backend Pipeline
+
+on:
+  pull_request:
+    branches:
+      - main
+
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  test:
+    uses: ./.github/workflows/test.yml
+
+  build:
+    if: github.event_name == 'push'
+    needs: test
+    uses: ./.github/workflows/build.yml
+    secrets: inherit
+
+  deploy:
+    if: github.event_name == 'push'
+
+    needs: build
+
+    uses: ./.github/workflows/deploy.yml
+    
+    with:
+      image: ${{ needs.build.outputs.image }}
+      tag: ${{ needs.build.outputs.tag }}
+
+    secrets: inherit
