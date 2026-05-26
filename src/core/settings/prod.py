@@ -89,11 +89,11 @@ REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"] = [
     "rest_framework.renderers.JSONRenderer",
 ]
 
-# SPECTACULAR - Restrict schema in production
-# ============================================================================
-SPECTACULAR_SETTINGS["SERVERS"] = [
-    {"url": env.str("DOMAIN_URL", default="https://example.com")},
-]
+# # SPECTACULAR - Restrict schema in production
+# # ============================================================================
+# SPECTACULAR_SETTINGS["SERVERS"] = [
+#     {"url": env.str("DOMAIN_URL", default="https://example.com")},
+# ]
 
 # LOGGING - Production logging (Console only for K8s)
 # ============================================================================
