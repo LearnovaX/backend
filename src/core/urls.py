@@ -27,17 +27,34 @@ import src.core.admin  # noqa
 
 from src.core.observability.metrics import metrics_view
 
+
 def health(request):
     return HttpResponse("ok")
 
 
 urlpatterns = [
+    path("api/admin/", admin.site.urls),
     path("api/", include("src.api.urls")),
+    path("api/ckeditor/", include("ckeditor_uploader.urls")),
     path("health/", health, name="health"),
     path("metrics/", metrics_view, name="metrics"),
-    path("", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
-    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
-    path("api/silk/", include("silk.urls", namespace="silk")),
-    path("api/admin/", admin.site.urls),
-    path("api/ckeditor/", include("ckeditor_uploader.urls")),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+]
+
+if "drf_spectacular" in settings.INSTALLED_APPS and settings.DEBUG:
+    from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+
+    urlpatterns += [
+        path("api/schema/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
+        path("api/docs/", SpectacularAPIView.as_view(), name="schema"),
+    ]
+
+if "silk" in settings.INSTALLED_APPS:
+    urlpatterns += [
+        path("api/silk/", include("silk.urls", namespace="silk")),
+    ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+
