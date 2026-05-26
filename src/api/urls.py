@@ -1,6 +1,11 @@
 from django.urls import include, path
+from django.http import HttpResponse
+
+def health(request):
+    return HttpResponse("ok")
 
 urlpatterns = [
+    path("health/", health, name="api-health"),
     path("accounts/", include("src.api.users.urls")),
     path("tasks/", include("src.api.assignments.urls")),
     path("course/", include("src.api.courses.urls")),

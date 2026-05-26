@@ -13,12 +13,17 @@ if DEBUG:
     raise RuntimeError(
         "DEBUG=True in production is not allowed. Set DJANGO_DEBUG=False in your environment."
     )
+# ALLOWED HOSTS
+# ============================================================================
+ALLOWED_HOSTS = env.list(
+    "ALLOWED_HOSTS", default=["*"]
+)
 
 # SECURITY - SSL/HTTPS
 # ============================================================================
-# SECURE_SSL_REDIRECT = env.bool("DJANGO_SECURE_SSL_REDIRECT", default=True)
-# SESSION_COOKIE_SECURE = True
-# CSRF_COOKIE_SECURE = True
+SECURE_SSL_REDIRECT = env.bool("DJANGO_SECURE_SSL_REDIRECT", default=True)
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 # SECURE_BROWSER_XSS_FILTER = True
 # SECURE_CONTENT_TYPE_NOSNIFF = True
 
@@ -30,8 +35,10 @@ if DEBUG:
 # SECURE_HSTS_PRELOAD = env.bool("DJANGO_SECURE_HSTS_PRELOAD", default=True)
 #
 # # Proxy SSL header
-# SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-#
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
+
+
 # # SESSION & CSRF
 # # ============================================================================
 # SESSION_COOKIE_HTTPONLY = True
@@ -39,11 +46,6 @@ if DEBUG:
 # SESSION_COOKIE_NAME = "__Secure-sessionid"
 # CSRF_COOKIE_NAME = "__Secure-csrftoken"
 
-# ALLOWED HOSTS
-# ============================================================================
-ALLOWED_HOSTS = env.list(
-    "ALLOWED_HOSTS", default=["*"]
-)
 
 # CORS - Restricted in production
 # ============================================================================

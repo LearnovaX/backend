@@ -288,6 +288,10 @@ class AnswerModelViewSet(ModelViewSet):
             for file in files:
                 answer_file = AnswerFile.objects.create(answer=answer, file=file)
                 created_files.append(answer_file)
+            answer.plagiarism_status = Answer.PlagiarismStatus.pending_analysis
+            answer.extracted_text = ""
+            answer.analyzed_at = None
+            answer.save(update_fields=["plagiarism_status", "extracted_text", "analyzed_at"])
 
         serializer = AnswerFileSerializer(created_files, many=True, context={"request": request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)

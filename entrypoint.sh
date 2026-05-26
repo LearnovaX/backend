@@ -1,8 +1,18 @@
 #!/bin/sh
 set -eu
 
+echo "START MIGRATIONS"
 python manage.py migrate --noinput
-python manage.py collectstatic --noinput
+echo "MIGRATIONS DONE"
+
+echo "START COLLECTSTATIC IN BACKGROUND"
+(
+  python manage.py collectstatic --noinput \
+    && echo "COLLECTSTATIC DONE" \
+    || echo "COLLECTSTATIC FAILED"
+) &
+
+echo "START DAPHNE"
 
 exec daphne \
     -b 0.0.0.0 \

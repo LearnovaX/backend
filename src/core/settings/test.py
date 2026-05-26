@@ -9,6 +9,7 @@ from .base import INSTALLED_APPS, MIDDLEWARE, TEMPLATES, env
 # ============================================================================
 DEBUG = True
 ALLOWED_HOSTS = ["*"]
+TESTING = True
 
 # PASSWORD HASHERS - Faster MD5 for tests
 # ============================================================================

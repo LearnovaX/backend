@@ -199,20 +199,22 @@ class Command(BaseCommand):
 
                 user.save()
 
-                # Always create a linked UserProfile (avoid 500s)
-                profile = UserProfile.objects.create(
-                    user=user,
-                    middle_name=(fake.first_name() if random.random() < 0.5 else None),
-                    interface_language=random.choice(["en", "ru", "uz"]),
-                    timezone=random.choice(["UTC+5", "UTC+3", "UTC+6"]),
-                    birth_date=fake.date_between(start_date="-60y", end_date="-18y"),
-                    profile_edit_blocked=random.random() < 0.05,
-                    deactivation_time=deactivation_time,
-                    days_to_delete_after_deactivation=days_to_delete,
-                    phone_number=unique_phone(),
-                    company=(fake.company() if random.random() < 0.5 else None),
-                    # profile_photo left empty; your validator requires real files
-                )
+                # Always create or get a linked UserProfile (avoid 500s)
+                # Use get_or_create since the signal also creates one
+                profile, created = UserProfile.objects.get_or_create(user=user)
+
+                # Update profile fields regardless of whether it was just created
+                profile.middle_name = fake.first_name() if random.random() < 0.5 else None
+                profile.interface_language = random.choice(["en", "ru", "uz"])
+                profile.timezone = random.choice(["UTC+5", "UTC+3", "UTC+6"])
+                profile.birth_date = fake.date_between(start_date="-60y", end_date="-18y")
+                profile.profile_edit_blocked = random.random() < 0.05
+                profile.deactivation_time = deactivation_time
+                profile.days_to_delete_after_deactivation = days_to_delete
+                profile.phone_number = unique_phone()
+                profile.company = fake.company() if random.random() < 0.5 else None
+                # profile_photo left empty; your validator requires real files
+                profile.save()
 
                 created_users.append((user, profile))
 

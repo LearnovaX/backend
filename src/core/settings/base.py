@@ -27,6 +27,7 @@ if not IN_K8S:
 SECRET_KEY = env.str("SECRET_KEY", default="secret")
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["*"])
 DEBUG = env.bool("DEBUG", default=env.bool("DJANGO_DEBUG", default=False))
+TESTING = env.bool("TESTING", default=False)
 
 # Build paths
 ROOT_URLCONF = "src.core.urls"
@@ -50,12 +51,11 @@ LOCAL_APPS = [
     "src.apps.assignments",
     "src.apps.courses",
     "src.apps.submissions",
+    "src.apps.plagiarism",
     "src.apps.notifications",
+    "src.apps.chat",
     "src.apps.grades",
     "src.apps.logs",
-    "src.apps.plagiarism",
-    
-    "src.apps.chat",
 ]
 
 THIRD_PARTY_APPS = [
@@ -175,7 +175,7 @@ STORAGES: dict[str, dict[str, object]] = {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
 
@@ -355,6 +355,12 @@ CACHES = {
     }
 }
 
+# RATE LIMITING
+# ============================================================================
+RATE_LIMITS = {
+    "default_authenticated": {"capacity": 300, "refill_rate": 10},
+    "default_anonymous": {"capacity": 60, "refill_rate": 1},
+}
 
 # DJANGO UNFOLD
 # ============================================================================
@@ -464,8 +470,6 @@ if FILE_LOGGING_ENABLED:
     else:
         FILE_LOGGING_ENABLED = os.access(LOGS_DIR, os.W_OK)
 
-
-
 # LOGGING
 # ============================================================================
 # In-memory logging configuration for high-scale applications
@@ -484,11 +488,6 @@ LOGGING = {
         "verbose": {
             "format": "[{asctime}] {levelname} {name}:{lineno} - {message}",
             "style": "{",
-            "datefmt": "%Y-%m-%d %H:%M:%S",
-        },
-        "json": {
-            "()": "pythonjsonlogger.jsonlogger.JsonFormatter",
-            "format": "%(asctime)s %(name)s %(levelname)s %(message)s",
         },
     },
     "handlers": {
@@ -497,40 +496,19 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "verbose",
         },
-        "in_memory": {
-            "level": "INFO",
-            "class": "src.apps.logs.in_memory_logger.InMemoryLogHandler",
-            "buffer_size": IN_MEMORY_LOG_BUFFER_SIZE,
-            "overflow_strategy": IN_MEMORY_LOG_OVERFLOW,
-        },
-        "optimized_db": {
-            "level": "INFO",
-            "class": "src.apps.logs.handlers.OptimizedDatabaseHandler",
-            "batch_size": IN_MEMORY_LOG_BATCH_SIZE,
-            "formatter": "verbose",
-        },
+        # "db": {
+        #     "level": "INFO",
+        #     "class": "src.apps.logs.handlers.DatabaseHandler",
+        #     "formatter": "verbose",
+        # },
     },
     "root": {
-        "handlers": ["console", "in_memory"],
+        "handlers": ["console", "db"],
         "level": "INFO",
-    },
-    "loggers": {
-        "django": {
-            "handlers": ["console", "in_memory"],
-            "level": "INFO",
-            "propagate": False,
-        },
-        "django.db.backends": {
-            "handlers": ["console"],
-            "level": "DEBUG",
-            "propagate": False,
-        },
     },
 }
 
-
 ENROL_LINK_URL = env.str("ENROL_LINK_URL", default="http://localhost:5173/enroll/")
-
 import platform
 
 if platform.system() == "Windows":
@@ -552,13 +530,3 @@ OTEL_EXPORTER_OTLP_ENDPOINT = env.str(
 OTEL_EXPORTER_OTLP_PROTOCOL = env.str(
     "OTEL_EXPORTER_OTLP_PROTOCOL", default="http/protobuf"
 )
-
-# RATE LIMITING
-# ============================================================================
-RATE_LIMITS = {
-    "default_authenticated": {"capacity": 300, "refill_rate": 10},
-    "default_anonymous": {"capacity": 60, "refill_rate": 1},
-}
-
-
-

@@ -9,14 +9,12 @@ import signal
 import sys
 
 from django.core.signals import request_finished
-from django.dispatch import receiver
 
 from .utils import LoggingShutdownManager, LoggingMetricsCollector
 
 logger = logging.getLogger(__name__)
 
 
-@receiver(signal.SIGTERM)
 def handle_sigterm(signum, frame):
     """Handle SIGTERM signal (graceful shutdown)."""
     logger.info("Received SIGTERM signal, draining logging buffers...")
@@ -27,7 +25,6 @@ def handle_sigterm(signum, frame):
     sys.exit(0)
 
 
-@receiver(signal.SIGINT)
 def handle_sigint(signum, frame):
     """Handle SIGINT signal (Ctrl+C)."""
     logger.info("Received SIGINT signal, draining logging buffers...")

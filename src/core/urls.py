@@ -32,12 +32,12 @@ def health(request):
 
 
 urlpatterns = [
+    path("api/", include("src.api.urls")),
     path("health/", health, name="health"),
     path("metrics/", metrics_view, name="metrics"),
     path("", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
     path("schema/", SpectacularAPIView.as_view(), name="schema"),
     path("silk/", include("silk.urls", namespace="silk")),
-    path("admin/", admin.site.urls),
-    path("api/", include("src.api.urls")),
+    path("api/admin/", admin.site.urls),
     path("ckeditor/", include("ckeditor_uploader.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -22,7 +22,12 @@ class ImportUserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         profile_data = validated_data.pop("profile", {})
         user = User.objects.create(**validated_data)
-        UserProfile.objects.create(user=user, **profile_data)
+        # The signal already creates a UserProfile, so just update it if needed
+        profile, _ = UserProfile.objects.get_or_create(user=user)
+        if profile_data:
+            for field, value in profile_data.items():
+                setattr(profile, field, value)
+            profile.save()
         return user
 
     def update(self, instance, validated_data):

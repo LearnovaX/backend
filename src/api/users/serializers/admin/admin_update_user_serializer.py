@@ -31,7 +31,7 @@ class AdminUpdateUserSerializer(serializers.ModelSerializer):
         if profile_data is not None:
             profile = instance.profile
             if profile is None:
-                profile = UserProfile.objects.create(user=instance)
+                profile, _ = UserProfile.objects.get_or_create(user=instance)
 
             # Now we can update directly since validation already passed
             for attr, value in profile_data.items():

@@ -70,7 +70,7 @@ class QueueAwareLoggingMixin:
         return self._is_processing_queue
 
 
-class OptimizedDatabaseHandler(DatabaseHandler, QueueAwareLoggingMixin):
+class OptimizedDatabaseHandler(QueueAwareLoggingMixin, DatabaseHandler):
     """
     Database handler optimized for queue-based logging.
     

@@ -14,11 +14,13 @@ class AnswerAdmin(ModelAdmin):
         "task",
         "user",
         "status",
+        "plagiarism_status",
         "status_badge",
         "created_at_display",
     ]
     list_filter = [
         "status",
+        "plagiarism_status",
         "created_at",
     ]
     search_fields = [
@@ -38,7 +40,7 @@ class AnswerAdmin(ModelAdmin):
             "fields": ("id", "task", "user", "description", "status")
         }),
         ("Plagiarism Analysis", {
-            "fields": ("extracted_text", "analyzed_at")
+            "fields": ("plagiarism_status", "extracted_text", "analyzed_at")
         }),
         ("Dates", {
             "fields": ("created_at", "updated_at")

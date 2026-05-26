@@ -22,6 +22,8 @@ class LogsConfig(AppConfig):
         Sets up the queue listener manager to drain in-memory log buffers
         asynchronously to configured handlers.
         """
+        import sys
+
         from django.conf import settings
         
         from .in_memory_logger import get_or_create_in_memory_handler
@@ -31,7 +33,12 @@ class LogsConfig(AppConfig):
         # Only setup if not already done
         if hasattr(self, '_logging_initialized'):
             return
-        
+
+        # Skip logging setup during tests to avoid database connection issues
+        if 'test' in sys.argv or settings.TESTING:
+            self._logging_initialized = True
+            return
+
         try:
             # Get the in-memory handler
             in_memory_handler = get_or_create_in_memory_handler(
@@ -75,7 +82,6 @@ class LogsConfig(AppConfig):
             
         except Exception as e:
             # Don't fail app startup if logging setup fails
-            import sys
             print(f"Warning: Failed to setup in-memory logging: {e}", file=sys.stderr)
 
 

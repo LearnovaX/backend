@@ -37,7 +37,13 @@ class AdminCreateUserSerializer(serializers.ModelSerializer):
             must_set_password=True,
         )
         user.set_unusable_password()
-        UserProfile.objects.get_or_create(user=user, **profile_data)
+
+        # The signal already creates a UserProfile, so just update it if needed
+        profile, _ = UserProfile.objects.get_or_create(user=user)
+        if profile_data:
+            for field, value in profile_data.items():
+                setattr(profile, field, value)
+            profile.save()
 
         if role:
             name = {

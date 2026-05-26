@@ -1,0 +1,105 @@
+name: Deploy
+
+on:
+  workflow_call:
+    inputs:
+      image:
+        required: true
+        type: string
+
+      tag:
+        required: true
+        type: string
+
+jobs:
+
+  update-cluster-config:
+    name: Update Cluster Config Repository
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # ============================================================
+      # Install Kustomize CLI
+      # We use this to safely update image tags in kustomization.yml
+      # ============================================================
+      - name: Setup Kustomize
+        uses: imranismail/setup-kustomize@v2
+
+      # ============================================================
+      # Checkout cluster-config repository
+      #
+      # This is NOT the current backend repo.
+      # We clone the infrastructure repository separately.
+      #
+      # `path:` means:
+      # repo will appear under ./cluster-config
+      # ============================================================
+      - name: Checkout cluster-config repository
+        uses: actions/checkout@v4
+
+        with:
+          repository: LearnovaX/cluster-config
+          token: ${{ secrets.CLUSTER_CONFIG_PAT }}
+          path: cluster-config
+
+      # ============================================================
+      # Update backend image tag in kustomization.yml
+      #
+      # This modifies:
+      #
+      # images:
+      #   - name: backend-image
+      #     newName: ghcr.io/org/backend
+      #     newTag: sha123
+      #
+      # IMPORTANT:
+      # deployment.yml MUST use:
+      #
+      # image: backend-image
+      #
+      # instead of hardcoded image.
+      # ============================================================
+      - name: Update backend image tag
+        run: |
+
+          cd cluster-config/backend/prod
+
+          kustomize edit set image \
+            backend-image=${{ inputs.image }}:${{ inputs.tag }}
+
+      # ============================================================
+      # Commit updated image tag
+      #
+      # Example commit:
+      # Deploy backend a1b2c3d4
+      # ============================================================
+      - name: Commit changes
+        run: |
+
+          cd cluster-config
+
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+
+          git add .
+
+          git commit -m "Deploy backend ${{ inputs.tag }}" || exit 0
+
+      # ============================================================
+      # Push changes to cluster-config repository
+      #
+      # This automatically triggers:
+      #
+      # cluster-config/.github/workflows/backend-deploy.yml
+      #
+      # which performs:
+      # kubectl apply -k backend/prod
+      # ============================================================
+      - name: Push changes
+        run: |
+
+          cd cluster-config
+
+          git push
