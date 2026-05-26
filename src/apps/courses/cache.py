@@ -4,11 +4,13 @@ from collections.abc import Mapping
 
 from django.core.cache import cache
 
+COURSES_LIST_GENERATION_KEY = "courses:list:gen"
 COURSES_LIGHT_LIST_GENERATION_KEY = "courses:light-list:gen"
 COURSE_GROUPS_LIST_GENERATION_KEY = "courses:groups:list:gen"
 COURSE_GROUPS_PAGE_GENERATION_PREFIX = "courses:course:{course_id}:groups:gen"
-COURSE_GROUPS_LIST_TTL = 300
+COURSES_LIST_TTL = 300
 COURSES_LIGHT_LIST_TTL = 300
+COURSE_GROUPS_LIST_TTL = 300
 COURSE_GROUPS_PAGE_TTL = 300
 
 
@@ -40,6 +42,11 @@ def _query_signature(query_params: Mapping[str, object]) -> str:
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
+def courses_list_cache_key(query_params: Mapping[str, object]) -> str:
+    generation = _get_generation(COURSES_LIST_GENERATION_KEY)
+    return f"courses:list:v{generation}:{_query_signature(query_params)}"
+
+
 def course_light_list_cache_key(query_params: Mapping[str, object]) -> str:
     generation = _get_generation(COURSES_LIGHT_LIST_GENERATION_KEY)
     return f"courses:light-list:v{generation}:{_query_signature(query_params)}"
@@ -54,6 +61,10 @@ def course_groups_page_cache_key(course_id: int) -> str:
     generation_key = COURSE_GROUPS_PAGE_GENERATION_PREFIX.format(course_id=course_id)
     generation = _get_generation(generation_key)
     return f"courses:course:{course_id}:groups:v{generation}"
+
+
+def invalidate_courses_list_cache() -> None:
+    bump_generation(COURSES_LIST_GENERATION_KEY)
 
 
 def invalidate_courses_light_list_cache() -> None:
