@@ -1,7 +1,7 @@
 """
 Production settings - with security and performance optimizations.
 """
-#import dj_database_url
+# import dj_database_url
 
 from .base import *  # noqa: F401, F403
 from .base import DATABASES, INSTALLED_APPS, REST_FRAMEWORK, SPECTACULAR_SETTINGS, env
