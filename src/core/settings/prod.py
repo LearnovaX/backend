@@ -1,7 +1,7 @@
 """
 Production settings - with security and performance optimizations.
 """
-import dj_database_url
+#import dj_database_url
 
 from .base import *  # noqa: F401, F403
 from .base import DATABASES, INSTALLED_APPS, REST_FRAMEWORK, SPECTACULAR_SETTINGS, env
@@ -75,13 +75,13 @@ EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
 EMAIL_HOST_USER = env.str("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = env.str("EMAIL_HOST_PASSWORD")
 
-DATABASES = {
-    'default': dj_database_url.config(
-        default=env.str('DATABASE_URL'),
-        conn_max_age=600,
-        conn_health_checks=True,
-    )
-}
+# DATABASES = {
+#     'default': dj_database_url.config(
+#         default=env.str('DATABASE_URL'),
+#         conn_max_age=600,
+#         conn_health_checks=True,
+#     )
+# }
 
 # REST FRAMEWORK - JSON only in production
 # ============================================================================
