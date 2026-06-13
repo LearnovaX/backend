@@ -182,43 +182,68 @@ STORAGES: dict[str, dict[str, object]] = {
 if USE_S3:
     INSTALLED_APPS += ["storages"]
 
-    AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID")
-    AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY")
-    AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME")
-    AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME")
+    S3_ACCESS_KEY_ID = env("S3_ACCESS_KEY_ID")
+    S3_SECRET_ACCESS_KEY = env("S3_SECRET_ACCESS_KEY")
 
-    AWS_DEFAULT_ACL = None
-    AWS_QUERYSTRING_AUTH = False
-    AWS_S3_SIGNATURE_VERSION = "s3v4"
-    AWS_S3_FILE_OVERWRITE = False
+    S3_BUCKET_NAME = env("S3_BUCKET_NAME")
+
+    S3_REGION = env("S3_REGION")
+
+    S3_ENDPOINT_URL = env("S3_ENDPOINT_URL", default=None)
+
+    S3_PUBLIC_URL = env("S3_PUBLIC_URL", default=None)
+
+    S3_ADDRESSING_STYLE = env(
+        "S3_ADDRESSING_STYLE",
+        default="path",
+    )
+
+    S3_QUERYSTRING_AUTH = env.bool(
+        "S3_QUERYSTRING_AUTH",
+        False,
+    )
+
+    if not S3_PUBLIC_URL:
+        if S3_ENDPOINT_URL:
+            S3_PUBLIC_URL = S3_ENDPOINT_URL
+
+    S3_OPTIONS = {
+        "access_key": S3_ACCESS_KEY_ID,
+        "secret_key": S3_SECRET_ACCESS_KEY,
+        "bucket_name": S3_BUCKET_NAME,
+        "region_name": S3_REGION,
+        "endpoint_url": S3_ENDPOINT_URL,
+        "addressing_style": S3_ADDRESSING_STYLE,
+        "default_acl": None,
+        "querystring_auth": S3_QUERYSTRING_AUTH,
+        "file_overwrite": False,
+    }
 
     STORAGES["default"] = {
         "BACKEND": "storages.backends.s3.S3Storage",
         "OPTIONS": {
-            "bucket_name": AWS_STORAGE_BUCKET_NAME,
+            **S3_OPTIONS,
             "location": "media",
         },
     }
 
-    USE_S3_FOR_STATIC = env.bool("USE_S3_FOR_STATIC", False)
+    USE_S3_FOR_STATIC = env.bool("USE_S3_FOR_STATIC", False, )
 
     if USE_S3_FOR_STATIC:
         STORAGES["staticfiles"] = {
             "BACKEND": "storages.backends.s3.S3Storage",
             "OPTIONS": {
-                "bucket_name": AWS_STORAGE_BUCKET_NAME,
+                **S3_OPTIONS,
                 "location": "static",
             },
         }
 
         STATIC_URL = (
-            f"https://{AWS_STORAGE_BUCKET_NAME}.s3."
-            f"{AWS_S3_REGION_NAME}.amazonaws.com/static/"
+            f"{S3_PUBLIC_URL}/{S3_BUCKET_NAME}/static/"
         )
 
     MEDIA_URL = (
-        f"https://{AWS_STORAGE_BUCKET_NAME}.s3."
-        f"{AWS_S3_REGION_NAME}.amazonaws.com/media/"
+        f"{S3_PUBLIC_URL}/{S3_BUCKET_NAME}/media/"
     )
 
 # DEFAULT AUTO FIELD
